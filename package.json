@@ -1,0 +1,19 @@
+{
+  "name": "flight-booking-system",
+  "version": "1.0.0",
+  "description": "Task For ProGrad Round 2",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/preetsagar/flight-booking-system.git"
+  },
+  "author": "Preet Sagar",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/preetsagar/flight-booking-system/issues"
+  },
+  "homepage": "https://github.com/preetsagar/flight-booking-system#readme"
+}
