@@ -3,6 +3,7 @@ const AppError = require("../Utils/AppError");
 
 exports.addFlight = async (req, res, next) => {
   try {
+    const token = req.body.token;
     const body = {
       flightNumber: req.body.flightNumber,
       from: req.body.from,

@@ -2,6 +2,7 @@ const User = require("../Model/UserModel");
 const AppError = require("../Utils/AppError");
 const JWT = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
+const { promisify } = require("util");
 
 exports.signUp = async (req, res, next) => {
   try {
@@ -11,7 +12,7 @@ exports.signUp = async (req, res, next) => {
       password: req.body.password,
     };
     const user = await User.create(data);
-    const token = await JWT.sign(user.email, process.env.JWT_SECRET);
+    const token = await JWT.sign({ email: user.email }, process.env.JWT_SECRET, { expiresIn: "1h" });
     res.status(201).json({
       status: "Success",
       data: "New user Created",
@@ -30,7 +31,7 @@ exports.login = async (req, res, next) => {
     }
 
     // find User with the given Id
-    const user = await User.findOne().select("+password");
+    const user = await User.findOne({ email }).select("+password");
     if (!user) {
       return next(new AppError("Please Provide correct Email And Password", 401));
     }
@@ -38,7 +39,7 @@ exports.login = async (req, res, next) => {
     // Check Password Matches or not
     if (await bcrypt.compare(password, user.password)) {
       // Send the JWT TOKEN
-      const token = await JWT.sign(user.email, process.env.JWT_SECRET);
+      const token = await JWT.sign({ email: user.email }, process.env.JWT_SECRET, { expiresIn: "1h" });
       res.status(201).json({
         status: "Success",
         data: "Logged In",
@@ -49,5 +50,45 @@ exports.login = async (req, res, next) => {
     }
   } catch (err) {
     next(new AppError(err.message, 401));
+  }
+};
+
+exports.checkLogin = async (req, res, next) => {
+  try {
+    const token = req.body.token;
+    // console.log(token);
+    // Promisified the verify
+    const decoded = await promisify(JWT.verify)(token, process.env.JWT_SECRET);
+    // console.log(decoded);
+    const user = await User.findOne({ email: decoded.email }).select("+isAdmin");
+    // console.log(user);
+    if (!user) {
+      throw "Please Login In";
+    }
+    // Add user to req body
+    req.user = user;
+    // Call the next middleware
+    next();
+  } catch (error) {
+    res.status(401).json({
+      status: "Fail",
+      Data: error.message,
+    });
+  }
+};
+
+exports.checkAdmin = async (req, res, next) => {
+  try {
+    // console.log(req.user);
+    if (req.user.isAdmin) {
+      return next();
+    } else {
+      throw "Please Log in As Admin";
+    }
+  } catch (error) {
+    res.status(401).json({
+      status: "Fail",
+      data: error.message || error,
+    });
   }
 };

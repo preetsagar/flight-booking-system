@@ -4,6 +4,8 @@ const flightController = require("./../controller/flightController");
 
 const route = express.Router();
 
-route.post("/", flightController.addFlight).delete("/", flightController.removeFlight);
+route
+  .post("/", authController.checkLogin, authController.checkAdmin, flightController.addFlight)
+  .delete("/", authController.checkLogin, authController.checkAdmin, flightController.removeFlight);
 
 module.exports = route;
