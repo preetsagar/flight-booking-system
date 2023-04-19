@@ -137,3 +137,23 @@ exports.myBooking = async (req, res, next) => {
     return next(new AppError(error.message, 400));
   }
 };
+
+exports.bookingsBasedOnFlight = async (req, res, next) => {
+  try {
+    const flight = await Flight.findOne({ flightNumber: req.body.flightNumber });
+    if (!flight) {
+      res.status(400).json({
+        status: "Fail",
+        data: "Enter Correct FlightNumber",
+      });
+    } else {
+      var bookings = await Booking.find({ flight: flight._id });
+    }
+    res.status(200).json({
+      status: "Success",
+      data: bookings,
+    });
+  } catch (error) {
+    return next(new AppError(error.message, 400));
+  }
+};
