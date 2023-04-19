@@ -1,3 +1,4 @@
+const Booking = require("../Model/BookingModel");
 const Flight = require("../Model/Flightodel");
 const AppError = require("../Utils/AppError");
 
@@ -93,10 +94,33 @@ exports.searchFlights = async (req, res, next) => {
   }
 };
 
-// exports.bookFlight = async (req, res, next) => {
-//   try {
+exports.bookFlight = async (req, res, next) => {
+  try {
+    const { flightNumber, Date, noOfSeats } = req.body;
+    const flight = await Flight.findOne({ flightNumber });
+    availableSeats = flight.day[Date - 1][Date];
 
-//   } catch (error) {
-//     return next(new AppError(error.message, 400));
-//   }
-// };
+    // check seats availability
+    if (availableSeats < noOfSeats) {
+      return res.status(400).json({
+        status: "Fail",
+        data: `${noOfSeats} seats is on available on the particular Day`,
+      });
+    } else {
+      var bookingDetails = await Booking.create({ user: req.user._id, flight: flight._id, date: Date, noOfSeats });
+      const val = `day.${Date - 1}`;
+      const data = await Flight.findOneAndUpdate(
+        { flightNumber },
+        { $set: { [val]: { [Date]: availableSeats - noOfSeats } } },
+        { new: true, runValidators: true }
+      );
+      //   console.log(data);
+    }
+    res.status(200).json({
+      status: "Success",
+      data: bookingDetails,
+    });
+  } catch (error) {
+    return next(new AppError(error.message, 400));
+  }
+};

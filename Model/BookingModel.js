@@ -11,9 +11,11 @@ const bookingSchema = new mongoose.Schema({
     ref: "Flight",
     required: true,
   },
-  seatNumber: {
+  date: {
+    type: String,
+  },
+  noOfSeats: {
     type: Number,
-    required: true,
   },
 });
 
