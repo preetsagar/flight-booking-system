@@ -70,19 +70,33 @@ exports.searchFlights = async (req, res, next) => {
       departureTime: { $gte: time },
       day: {
         $elemMatch: {
-          [searchDate.getDay()]: { $gt: 0 },
+          [searchDate.getDate()]: { $gt: 0 },
         },
       },
       from,
       to,
     }).select("-seatsAvailable");
 
+    const flightResult = flights.map((ele) => {
+      ele.availableSeats = ele.day[searchDate.getDate() - 1][searchDate.getDate()];
+      ele.day = ele.day.slice(searchDate.getDate() - 1);
+      return ele;
+    });
+
     res.status(200).json({
       status: "Success",
       result: flights.length,
-      data: flights,
+      data: flightResult,
     });
   } catch (error) {
     return next(new AppError(error.message, 400));
   }
 };
+
+// exports.bookFlight = async (req, res, next) => {
+//   try {
+
+//   } catch (error) {
+//     return next(new AppError(error.message, 400));
+//   }
+// };
