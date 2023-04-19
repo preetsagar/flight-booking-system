@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const app = require("./app");
 
+// Configured the .env file
 dotenv.config();
 
 // Connect with the DataBase
@@ -12,7 +13,7 @@ mongoose
   .then(() => {
     console.log("Connected With The DataBASE");
 
-    //   After Connecting with the database not start listening
+    //   After Connecting with the database now start listening
     const PORT = 3000 || process.env.PORT;
     app.listen(PORT, () => {
       console.log(`Server Running on Port ${PORT}`);
