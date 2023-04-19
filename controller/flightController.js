@@ -142,14 +142,14 @@ exports.bookingsBasedOnFlight = async (req, res, next) => {
   try {
     const flight = await Flight.findOne({ flightNumber: req.body.flightNumber });
     if (!flight) {
-      res.status(400).json({
+      return res.status(400).json({
         status: "Fail",
         data: "Enter Correct FlightNumber",
       });
     } else {
       var bookings = await Booking.find({ flight: flight._id });
     }
-    res.status(200).json({
+    return res.status(200).json({
       status: "Success",
       data: bookings,
     });
