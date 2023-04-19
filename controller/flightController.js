@@ -65,7 +65,17 @@ exports.searchFlights = async (req, res, next) => {
     }
 
     // const flights = await Flight.find({ departureTime: { $gte: time }, day: 0 }).select("-day");
-    const flights = await Flight.find({ departureTime: { $gte: time }, day: searchDate.getDay(), from, to });
+    const day = `day.${searchDate.getDay()}`;
+    const flights = await Flight.find({
+      departureTime: { $gte: time },
+      day: {
+        $elemMatch: {
+          [searchDate.getDay()]: { $gt: 0 },
+        },
+      },
+      from,
+      to,
+    }).select("-seatsAvailable");
 
     res.status(200).json({
       status: "Success",
