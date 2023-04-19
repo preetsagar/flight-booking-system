@@ -41,3 +41,38 @@ exports.removeFlight = async (req, res, next) => {
     return next(new AppError(err.message, 400));
   }
 };
+
+exports.searchFlights = async (req, res, next) => {
+  try {
+    // console.log(req.query);
+    const { date, time, from, to } = req.query;
+    const searchDate = new Date(`${date}T${time}`);
+    searchDate.setHours(searchDate.getHours() + 5);
+    searchDate.setMinutes(searchDate.getMinutes() + 30);
+
+    const currentDate = new Date();
+    currentDate.setHours(currentDate.getHours() + 5);
+    currentDate.setMinutes(currentDate.getMinutes() + 30);
+
+    // CHeck weather date belongs to future or not
+    const dateDiff = currentDate.getTime() - searchDate.getTime();
+    if (dateDiff > 0) {
+      console.log("Current Date is Greater");
+      return res.status(400).json({
+        status: "Fail",
+        data: "Date Can't be past",
+      });
+    }
+
+    // const flights = await Flight.find({ departureTime: { $gte: time }, day: 0 }).select("-day");
+    const flights = await Flight.find({ departureTime: { $gte: time }, day: searchDate.getDay(), from, to });
+
+    res.status(200).json({
+      status: "Success",
+      result: flights.length,
+      data: flights,
+    });
+  } catch (error) {
+    return next(new AppError(error.message, 400));
+  }
+};

@@ -6,6 +6,7 @@ const route = express.Router();
 
 route
   .post("/", authController.checkLogin, authController.checkAdmin, flightController.addFlight)
-  .delete("/", authController.checkLogin, authController.checkAdmin, flightController.removeFlight);
+  .delete("/", authController.checkLogin, authController.checkAdmin, flightController.removeFlight)
+  .post("/search", authController.checkLogin, flightController.searchFlights);
 
 module.exports = route;
