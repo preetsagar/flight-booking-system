@@ -124,3 +124,16 @@ exports.bookFlight = async (req, res, next) => {
     return next(new AppError(error.message, 400));
   }
 };
+
+exports.myBooking = async (req, res, next) => {
+  try {
+    const myBookings = await Booking.find({ user: req.user._id });
+    res.status(200).json({
+      status: "Success",
+      result: myBookings.length,
+      data: myBookings,
+    });
+  } catch (error) {
+    return next(new AppError(error.message, 400));
+  }
+};
