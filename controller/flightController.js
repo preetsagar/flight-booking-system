@@ -10,6 +10,10 @@ exports.addFlight = async (req, res, next) => {
       to: req.body.to,
       departureTime: req.body.departureTime,
       arrivalTime: req.body.arrivalTime,
+      price: req.body.price,
+      airLine: req.body.airline,
+      duration: req.body.duration,
+      day: req.body.day,
     };
     const flight = await Flight.create(body);
     res.status(201).json({

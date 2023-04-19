@@ -6,6 +6,9 @@ const flightSchema = mongoose.Schema({
     required: [true, "Flight Number is required"],
     unique: [true, "Flight Name must be unique"],
   },
+  airLine: {
+    type: String,
+  },
   from: {
     type: String,
     required: [true, "Starting Point is required"],
@@ -25,6 +28,16 @@ const flightSchema = mongoose.Schema({
   seatsAvailable: {
     type: Number,
     default: 60,
+  },
+  price: {
+    type: Number,
+    required: [true, "Price Must be Present"],
+  },
+  duration: {
+    type: Number,
+  },
+  day: {
+    type: Array,
   },
 });
 
