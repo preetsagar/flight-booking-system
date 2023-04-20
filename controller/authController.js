@@ -13,9 +13,10 @@ exports.signUp = async (req, res, next) => {
     };
     const user = await User.create(data);
     const token = await JWT.sign({ email: user.email }, process.env.JWT_SECRET, { expiresIn: "1h" });
+    user.password = undefined;
     res.status(201).json({
       status: "Success",
-      data: "New user Created",
+      data: user,
       token,
     });
   } catch (error) {
@@ -40,9 +41,41 @@ exports.login = async (req, res, next) => {
     if (await bcrypt.compare(password, user.password)) {
       // Send the JWT TOKEN
       const token = await JWT.sign({ email: user.email }, process.env.JWT_SECRET, { expiresIn: "1h" });
+      user.password = undefined;
       res.status(201).json({
         status: "Success",
-        data: "Logged In",
+        data: user,
+        token,
+      });
+    } else {
+      return next(new AppError("Please Provide correct Email And Password", 401));
+    }
+  } catch (err) {
+    next(new AppError(err.message, 401));
+  }
+};
+
+exports.adminLogin = async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return next(new AppError("Please Provide Email And Password", 401));
+    }
+
+    // find User with the given Id
+    const user = await User.findOne({ email }).select("+password +isAdmin");
+    if (!user || !user.isAdmin) {
+      return next(new AppError("Please Provide correct Email And Password", 401));
+    }
+
+    // Check Password Matches or not
+    if (await bcrypt.compare(password, user.password)) {
+      // Send the JWT TOKEN
+      const token = await JWT.sign({ email: user.email }, process.env.JWT_SECRET, { expiresIn: "1h" });
+      user.password = undefined;
+      res.status(201).json({
+        status: "Success",
+        data: user,
         token,
       });
     } else {
@@ -90,5 +123,18 @@ exports.checkAdmin = async (req, res, next) => {
       status: "Fail",
       data: error.message || error,
     });
+  }
+};
+
+exports.checkToken = async (req, res, next) => {
+  try {
+    const token = req.body.token;
+    await promisify(JWT.verify)(token, process.env.JWT_SECRET);
+    return res.status(200).json({
+      status: "Success",
+      data: "Logged In",
+    });
+  } catch (error) {
+    return next(new AppError(error.message, 400));
   }
 };

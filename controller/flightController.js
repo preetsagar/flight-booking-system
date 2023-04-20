@@ -79,8 +79,9 @@ exports.searchFlights = async (req, res, next) => {
     }).select("-seatsAvailable");
 
     const flightResult = flights.map((ele) => {
-      ele.availableSeats = ele.day[searchDate.getDate() - 1][searchDate.getDate()];
-      ele.day = ele.day.slice(searchDate.getDate() - 1);
+      // ele.availableSeats = ele.day[searchDate.getDate() - 1][searchDate.getDate()];
+      // ele.day = ele.day.slice(searchDate.getDate() - 1);
+      ele.day = ele.day[searchDate.getDate() - 1][searchDate.getDate()];
       return ele;
     });
 
@@ -107,7 +108,13 @@ exports.bookFlight = async (req, res, next) => {
         data: `${noOfSeats} seats is on available on the particular Day`,
       });
     } else {
-      var bookingDetails = await Booking.create({ user: req.user._id, flight: flight._id, date: Date, noOfSeats });
+      var bookingDetails = await Booking.create({
+        user: req.user._id,
+        flight: flight._id,
+        date: Date,
+        noOfSeats,
+        flightNumber: flight.flightNumber,
+      });
       const val = `day.${Date - 1}`;
       const data = await Flight.findOneAndUpdate(
         { flightNumber },
@@ -127,11 +134,18 @@ exports.bookFlight = async (req, res, next) => {
 
 exports.myBooking = async (req, res, next) => {
   try {
-    const myBookings = await Booking.find({ user: req.user._id });
+    let myBookings = await Booking.find({ user: req.user._id });
+    let obj;
+    let Bookings = myBookings.map(async (ele, index) => {
+      const currFlight = await Flight.findOne({ _id: ele.flight });
+      ele.flightNumber = currFlight.flightNumber;
+      return ele;
+    });
+    Bookings = await Promise.all(Bookings);
     res.status(200).json({
       status: "Success",
       result: myBookings.length,
-      data: myBookings,
+      data: Bookings,
     });
   } catch (error) {
     return next(new AppError(error.message, 400));

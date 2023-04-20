@@ -11,6 +11,9 @@ const bookingSchema = new mongoose.Schema({
     ref: "Flight",
     required: true,
   },
+  flightNumber: {
+    type: String,
+  },
   date: {
     type: String,
   },
