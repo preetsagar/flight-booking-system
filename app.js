@@ -13,6 +13,12 @@ app.use(express.json());
 
 app.use("/api/users", userRoute);
 app.use("/api/flights", flightRoute);
+app.use("/*", (req, res, next) => {
+  res.status(400).json({
+    staus: "Fail",
+    data: "No route matched",
+  });
+});
 
 // Handling Global ERROR
 app.use(globalErrorController);
